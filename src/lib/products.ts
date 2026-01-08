@@ -44,9 +44,17 @@ export async function getProductById(id: string): Promise<Product | null> {
 // ---- 提供给页面使用的“通过 API 获取数据”的封装（SSR 调接口示例）----
 
 const getBaseUrl = () => {
-  // 在生产环境推荐设置 NEXT_PUBLIC_BASE_URL 指向你的站点域名
+  // 优先使用用户自定义的环境变量
   const fromEnv = process.env.NEXT_PUBLIC_BASE_URL;
   if (fromEnv) return fromEnv.replace(/\/$/, "");
+  
+  // 在 Vercel 环境中，使用 VERCEL_URL（Vercel 自动提供）
+  const vercelUrl = process.env.VERCEL_URL;
+  if (vercelUrl) {
+    // VERCEL_URL 不包含协议，需要加上 https://
+    return `https://${vercelUrl}`;
+  }
+  
   // 本地开发时兜底为 localhost
   return "http://localhost:3000";
 };

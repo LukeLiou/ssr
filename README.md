@@ -65,14 +65,15 @@
   4. 如果有自定义域名，在「Domains」里绑定即可。
   5. 点击「Deploy」，等待构建和部署完成，几分钟内就可以访问。
 
-- **环境变量设置**
-  - 如果你希望在 SSR 中调用自己的正式域名，可以在 Vercel 项目的「Environment Variables」里设置：
+- **环境变量设置（可选）**
+  - **默认情况下**：代码会自动检测 Vercel 环境，使用 `VERCEL_URL` 环境变量（Vercel 自动提供），无需手动配置即可正常工作。
+  - **如果你有自定义域名**：可以在 Vercel 项目的「Settings」→「Environment Variables」里设置：
 
     ```bash
     NEXT_PUBLIC_BASE_URL=https://your-domain.com
     ```
 
-  - 不设置的话，代码里会自动使用 Vercel 提供的部署域名。
+    这样 SSR 时会优先使用你指定的域名。
 
 #### 方法二：自己部署 Node 服务器
 
@@ -112,14 +113,16 @@
 
 ### 关于 BASE_URL
 
-为了在 SSR 时调用自己的 API，本项目在 `src/lib/products.ts` 里约定了一个 `getBaseUrl()`：
+为了在 SSR 时调用自己的 API，本项目在 `src/lib/products.ts` 里约定了一个 `getBaseUrl()`，它会按以下优先级选择 URL：
 
-- 本地开发：默认使用 `http://localhost:3000`
-- 生产部署（可选）：建议在环境变量里设置 `NEXT_PUBLIC_BASE_URL` 为你的站点域名，例如：
+1. **`NEXT_PUBLIC_BASE_URL`**（用户自定义，优先级最高）
+2. **`VERCEL_URL`**（Vercel 自动提供，部署到 Vercel 时无需配置即可使用）
+3. **`http://localhost:3000`**（本地开发兜底）
 
-  ```bash
-  NEXT_PUBLIC_BASE_URL=https://your-domain.com
-  ```
+这意味着：
+- **本地开发**：自动使用 `http://localhost:3000`
+- **部署到 Vercel**：自动使用 Vercel 提供的域名（如 `https://xxx.vercel.app`），无需配置
+- **自定义域名**：如需使用自己的域名，设置 `NEXT_PUBLIC_BASE_URL=https://your-domain.com` 即可
 
 
 
