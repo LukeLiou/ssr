@@ -41,7 +41,7 @@ export async function getProductById(id: string): Promise<Product | null> {
   return product ?? null;
 }
 
-// ---- 提供给页面使用的“通过 API 获取数据”的封装（SSR 调接口示例）----
+// ---- 提供给页面使用的"通过 API 获取数据"的封装（SSR 调接口示例）----
 
 const getBaseUrl = () => {
   // 优先使用用户自定义的环境变量
@@ -59,8 +59,20 @@ const getBaseUrl = () => {
   return "http://localhost:3000";
 };
 
+/**
+ * 获取商品列表
+ * - 在服务器端（Server Component）：直接调用 getAllProducts()，避免 HTTP 请求
+ * - 在客户端（Client Component）：通过 HTTP 请求调用 API
+ */
 export async function fetchProducts(): Promise<Product[]> {
-  const res = await fetch(`${getBaseUrl()}/api/products`, {
+  // 在服务器端运行时，直接调用函数，避免 HTTP 请求
+  // 这样可以避免在 Vercel 等 Serverless 环境中的网络问题
+  if (typeof window === "undefined") {
+    return getAllProducts();
+  }
+
+  // 在客户端运行时，通过 HTTP 请求
+  const res = await fetch("/api/products", {
     cache: "no-store"
   });
 
@@ -71,8 +83,19 @@ export async function fetchProducts(): Promise<Product[]> {
   return res.json();
 }
 
+/**
+ * 获取商品详情
+ * - 在服务器端（Server Component）：直接调用 getProductById()，避免 HTTP 请求
+ * - 在客户端（Client Component）：通过 HTTP 请求调用 API
+ */
 export async function fetchProductById(id: string): Promise<Product | null> {
-  const res = await fetch(`${getBaseUrl()}/api/products/${id}`, {
+  // 在服务器端运行时，直接调用函数，避免 HTTP 请求
+  if (typeof window === "undefined") {
+    return getProductById(id);
+  }
+
+  // 在客户端运行时，通过 HTTP 请求
+  const res = await fetch(`/api/products/${id}`, {
     cache: "no-store"
   });
 
